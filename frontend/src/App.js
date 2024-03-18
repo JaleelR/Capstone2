@@ -13,32 +13,38 @@ export const TOKEN_STORAGE_ID = "api-token"
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userToken, setUserToken] = useState(TOKEN_STORAGE_ID);
+  const [userToken, setUserToken] = useLocalStorage(TOKEN_STORAGE_ID);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     async function getUser() {
+      setIsLoading(true); // Set loading to true when fetching user data
       if (userToken) {
-        console.log("useEffecttoken", userToken)
         try {
           let { username } = jwtDecode(userToken);
           Api.token = userToken;
-          //found error!
-          console.log("userrrrnammmmeeee", username);
-          let user = await Api.getUserInfo(username);
-          console.log("userrrrrrrrrr", user);
-          setCurrentUser(user);
-
+          try {
+            let user = await Api.getUserInfo(username);
+            setCurrentUser(user);
+          } catch (e) {
+            console.log("cannot find user")
+          }
         } catch (e) {
           console.log("Error:", e);
-          
         }
       } else {
         setCurrentUser(null);
-      };
+      }
+      setIsLoading(false); // Set loading to false after fetching user data
     }
     getUser();
   }, [userToken]);
 
+  function logout() {
+    setUserToken("");
+    setCurrentUser(null);
+    console.log(userToken);
+  }
 
 
   function logout() {
@@ -81,11 +87,12 @@ function App() {
 
   return (
     <BrowserRouter>
+      {console.log("________", currentUser)}
       <UserContext.Provider value={{ currentUser, setCurrentUser }} >
     <div className="App">
         <header className="App-header">
 
-          <RoutesComponent register={register}  login={login}  />
+          <RoutesComponent register={register}  login={login} logout={logout}  />
       </header>
       </div >
       </UserContext.Provider>
