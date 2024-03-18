@@ -116,7 +116,7 @@ class User {
         const userRes = await db.query(
             `SELECT username,
                   first_name AS "firstName",
-                  last_name AS "lastName",
+                  last_name AS "lastName"
            FROM users
            WHERE username = $1`,
             [username],

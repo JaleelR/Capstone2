@@ -56,7 +56,7 @@ export class Api {
 
     /* gets info on a user */
     static async getUserInfo(username) {
-        let res = await this.request(`${username}`);
+        let res = await this.request(`users/${username}`);
         return res;
     };
 

@@ -2,12 +2,13 @@ import React, {useState, useEffect} from "react";
 import axios from "axios"
 import { usePlaidLink } from 'react-plaid-link';
 import { Api } from "./Api";
+import { useNavigate } from "react-router-dom"
 axios.defaults.baseURL = 'http://localhost:3001';
 
 export const ConnectBank = () => {
     const [linkToken, setLinkToken] = useState();
     const [publicToken, setPublicToken] = useState();
-    
+    const navigate = useNavigate();
   
    
     useEffect(() => {
@@ -25,6 +26,7 @@ export const ConnectBank = () => {
         token: linkToken,
         onSuccess: (public_token, metadata) => {
             setPublicToken(public_token);
+
         },
     });
 
@@ -34,6 +36,7 @@ export const ConnectBank = () => {
             if (publicToken) {
             const accessToken = await Api.exchangePublicToken(publicToken);
                 console.log("access token:", accessToken);
+                navigate("/")
             } else {
                 console.log("no public token")
             }
