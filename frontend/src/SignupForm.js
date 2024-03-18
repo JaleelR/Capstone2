@@ -1,12 +1,11 @@
-import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom"
-// import {useHistory} from "react-router-dom"
 
 
 
-export const SignupForm = () => {
+export const SignupForm = ({ register}) => {
     const navigate = useNavigate()
-
+    
 
     // const history = useHistory();
     const form = {
@@ -18,12 +17,16 @@ export const SignupForm = () => {
 
 
     const [signup, setSignup] = useState(form);
+
     async function handleSubmit(e) {
         e.preventDefault();
-        navigate("/");
+        register(signup.username, signup.password, signup.firstName, signup.lastName);
+        navigate("/connectbank");
 
     }
 
+
+   
 
 
 
@@ -44,10 +47,9 @@ export const SignupForm = () => {
 
     return (
         <>
-            <h1>Signup</h1>
-
+            <h1>Signup</h1> 
             {console.log(signup)}
-
+         
             <form onSubmit={handleSubmit}>
                 {
 
@@ -83,7 +85,6 @@ export const SignupForm = () => {
                     onChange={handleChange}
                     value={signup.lastName}
                 />
-
 
                 <br />
                 <button> Submit </button>

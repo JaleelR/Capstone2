@@ -3,6 +3,12 @@
 /** Express app for Money Manager. */
 
 const express = require("express");
+const User = require("./models/user");
+const router = new express.Router();
+const { createToken } = require("./token");
+const { BadRequestError } = require("./expressError");
+
+
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const { NotFoundError } = require("./expressError");
@@ -18,7 +24,7 @@ const configuration = new Configuration({
 });
 const plaidClient = new PlaidApi(configuration);
 
-// const { authenticateJWT } = require("./middleware/auth");
+const { authenticateJWT } = require("./auth");
 // const authRoutes = require("./routes/auth");
 // const companiesRoutes = require("./routes/companies");
 // const usersRoutes = require("./routes/users");
@@ -31,15 +37,12 @@ const app = express();
 const path = require('path');
 const util = require('util');
 
-// app.post('/', async (req, res) => {
-//     res.json({ message: "hello" + req.body.name })
-// });
 
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(bodyParser.json())
 app.use(express.json());
 // app.use(morgan("tiny"));
-// app.use(authenticateJWT);
+app.use(authenticateJWT);
 
 // app.use("/auth", authRoutes);
 // app.use("/companies", companiesRoutes);
@@ -63,7 +66,7 @@ app.post('/create_link_token', async function (request, response) {
             // This should correspond to a unique id for the current user.
             client_user_id: "user",
         },
-        client_name: 'Plaid Test App',
+        client_name: 'Plaid money Manager app',
         products: ['auth'],
         language: 'en',
         country_codes: ['US'],
@@ -78,6 +81,44 @@ app.post('/create_link_token', async function (request, response) {
 });
 
 
+app.post("/register", async function (req, res, next) {
+    try {
+        const newUser = await User.register({ ...req.body });
+        const token = createToken(newUser);
+        return res.status(201).json({ token });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+
+app.post('/exchange_public_token', async function (request,response,next) {
+    const publicToken = request.body.publicToken;
+    const user = response.locals.user;
+    console.log("___________user_______",user);
+    try {
+        const plaidResponse = await plaidClient.itemPublicTokenExchange({
+            public_token: publicToken,
+        });
+
+        // These values should be saved to a persistent database and
+        // associated with the currently signed-in user
+        const accessToken = plaidResponse.data.access_token;
+        //add to user id
+        try { 
+       await User.updateAccessToken(user.username, accessToken);
+        console.log("Backend got access token!!!!!!", accessToken)
+        // const itemID = response.data.item_id
+        response.json({ accessToken, public_token_exchange: 'complete' });
+        } catch (e) {
+            console.log("updateAccess Token error", e)
+    }
+    } catch (error) {
+        // handle error
+        console.log("Error at plaid response___________", { Failed: error });
+        next(error);
+    }
+});
 
 /** Handle 404 errors -- this matches everything */
 app.use(function (req, res, next) {

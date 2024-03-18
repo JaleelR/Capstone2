@@ -7,8 +7,10 @@ import { Home } from "./Home";
 import { Transactions } from "./Transactions";
 import { Savings } from "./Savings";
 import { InVOut } from "./InVOut";
-import {EditForm} from "./EditForm"
-export const RoutesComponent = () => {
+import { EditForm } from "./EditForm"
+import {ConnectBank} from "./ConnectBank"
+
+export const RoutesComponent = ({register, login}) => {
     return (
         <>
             <Routes>
@@ -16,10 +18,11 @@ export const RoutesComponent = () => {
        
 
                 <Route exact path="/GetInfo" element={<GetInfo/>} />
-
-                <Route exact path="/signUp" element={<SignupForm/>} />
+                
+                <Route exact path="/signUp" element={<SignupForm register={register}  />} />
      
-                <Route exact path="/login" element={<LoginForm/>} />
+                <Route exact path="/login" element={<LoginForm login={login} />} />
+                <Route exact path="connectbank" element={<ConnectBank />} />
                 <Route exact path="/Edit" element={<EditForm/>} />
     
 
