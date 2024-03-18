@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 
 
-export const LoginForm = () => {
+export const LoginForm = ({login}) => {
     const navigate = useNavigate()
 
 
@@ -17,6 +17,7 @@ export const LoginForm = () => {
 
     const [signup, setSignup] = useState(form);
     async function handleSubmit(e) {
+        login(signup.username, signup.password)
         e.preventDefault();
         navigate("/");
 

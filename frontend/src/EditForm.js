@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { UserContext } from "./userContext";
 
 export const EditForm = () => {
+    const { currentUser } = useContext(UserContext);
     const form = {
         firstName: "",
         lastName: "",
