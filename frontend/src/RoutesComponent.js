@@ -33,6 +33,7 @@ export const RoutesComponent = ({register, login}) => {
                 <Route exact path="/Savings" element={<Savings/>} />
 
                 <Route exact path="/InVsOut" element={<InVOut/>} />
+                
         </Routes>
         </>
     )

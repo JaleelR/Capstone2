@@ -34,7 +34,7 @@ export const ConnectBank = () => {
     useEffect(() => {
         async function access_token() {
             if (publicToken) {
-            const accessToken = await Api.exchangePublicToken(publicToken);
+                const accessToken = await Api.exchangePublicToken(publicToken);
                 console.log("access token:", accessToken);
                 navigate("/")
             } else {

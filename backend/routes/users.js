@@ -8,7 +8,7 @@ const express = require("express");
 const { ensureCorrectUser} = require("../auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
-const { createToken } = require("../token");
+
 const router = express.Router();
 
 router.get("/:username", ensureCorrectUser, async function (req, res, next) {

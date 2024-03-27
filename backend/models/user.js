@@ -28,8 +28,7 @@ class User {
                 token,
                   password,
                   first_name AS "firstName",
-                  last_name AS "lastName",
-                  "
+                  last_name AS "lastName"
            FROM users
            WHERE username = $1`,
             [username],
@@ -127,7 +126,29 @@ class User {
         if (!user) throw new NotFoundError(`No user: ${username}`);
 
         return user;
-    }
+    };
+
+    /** Given a username, return token of user.
+     * 
+      *
+      * Returns { Token}
+      *
+      * Throws NotFoundError if user not found.
+      **/
+    static async getToken(username) { 
+        const userToken = await db.query(
+            `SELECT token FROM users WHERE username = $1`, [username],
+        );
+        const token = userToken.rows[0];
+        if (!token) throw new NotFoundError(`no token found`); 
+
+        return token.token;
+  }
+
+
+
+
+
 
     // /** Update user data with `data`.
     //  *

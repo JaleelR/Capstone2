@@ -1,15 +1,17 @@
 // app.js
 "use strict";
-
+require('dotenv').config();
 const express = require("express");
 const { authenticateJWT, ensureLoggedIn } = require("./auth");
 const usersRoutes = require("./routes/users");
 const bodyParser = require('body-parser');
 const { NotFoundError } = require("./expressError");
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+const User = require("./models/user");
 const morgan = require("morgan");
-
+const { createToken } = require("./token");
 const app = express();
+
 
 const cors = require("cors");
 const path = require('path');
@@ -18,8 +20,8 @@ const configuration = new Configuration({
     basePath: PlaidEnvironments.development,
     baseOptions: {
         headers: {
-            'PLAID-CLIENT-ID': "65e656d0892dd0001b49ba3e",
-            'PLAID-SECRET': "1da89d778689078b52cf1c9b6c1781",
+            'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID, // Retrieve from environment variable
+            'PLAID-SECRET': process.env.PLAID_SECRET_DEVELOPMENT, 
         },
     },
 });
@@ -67,7 +69,6 @@ app.post('/exchange_public_token', async function (request, response, next) {
         const plaidResponse = await plaidClient.itemPublicTokenExchange({
             public_token: publicToken,
         });
-
         // These values should be saved to a persistent database and
         // associated with the currently signed-in user
         const accessToken = plaidResponse.data.access_token;
@@ -84,6 +85,51 @@ app.post('/exchange_public_token', async function (request, response, next) {
         // handle error
         console.log("Error at plaid response___________", { Failed: error });
         next(error);
+    }
+});
+
+
+
+
+app.post("/auth", async function (request, response, next) {
+    const getUser = response.locals.user;
+    console.log("______USER______", getUser)
+    try {
+        const userToken = await User.getToken(getUser.username);
+        console.log("ACTUALL USERTOKEN:",  userToken)
+      
+        const plaidRequest = {
+            access_token: userToken,
+        };
+      
+        const plaidResponse = await plaidClient.authGet(plaidRequest);
+        console.log("it worked ")
+        return response.json(plaidResponse.data);
+        // Here you can use the accessToken as needed
+        // For example, you can send it back in the response
+       
+    } catch (error) {
+        console.log("it didnt work")
+        next(error); // Pass any errors to the error handling middleware
+    }
+}
+);
+ 
+
+
+app.post("/transactions", async function (req, res, next) {
+    const getUser = res.locals.user;
+    const userToken = await User.getToken(getUser.username);
+    console.log("TRANSSACTIONNNNNNNSSS:", userToken)
+    try {
+        const transactionsResult = await plaidClient.transactionsSync({
+            access_token: userToken
+        });
+       
+        return res.json(transactionsResult.data);
+    } catch (err) {
+        console.log("IT DIDNT WORK");
+        return next(err)
     }
 });
 
