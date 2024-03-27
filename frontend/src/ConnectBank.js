@@ -13,9 +13,9 @@ export const ConnectBank = () => {
    
     useEffect(() => {
         async function token_link() {
-            const tl = await Api.getLinkToken();
-            console.log(tl)
-            setLinkToken(tl);
+            const linkToken = await Api.getLinkToken();
+            console.log(linkToken)
+            setLinkToken(linkToken);
         }
         token_link();
     }, []);

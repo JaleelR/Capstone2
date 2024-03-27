@@ -20,38 +20,40 @@ function App() {
   
       setIsLoading(true); // Set loading to true when fetching user data
       if (userToken) {
-        try {
+        
           let { username } = jwtDecode(userToken);
           Api.token = userToken;
+
           try {
             let user = await Api.getUserInfo(username);
             setCurrentUser(user);
-
- try {
-              const auth = await Api.authGet();
-              console.log("AAAAAAAAUUUUUTHHHHH", auth);
-            } catch (e) {
-              console.log("Auth not created", e)
-            }
-
           } catch (e) {
             console.log("cannot find user")
-           
           }
+     //  try {
+            //               const auth = await Api.authGet();
+            //               console.log("AAAAAAAAUUUUUTHHHHH", auth);
+            //             } catch (e) {
+            //               console.log("Auth not created", e)
+            //             }
 
-          try {
-            const transactions = await Api.transactions();
-            console.log("transactionnnnnnnsssss", transactions);
-          } catch (e) {
-            console.log("trans not made", e)
-          }
+          //   try {
+          //     const transactions = await Api.transactions();
+          //     console.log("transactionnnnnnnsssss", transactions);
+          //   } catch (e) {
+          //     console.log("trans not made", e)
+          //   }
 
           
-        } catch (e) {
-          console.log("Error:", e);
+          // } catch (e) {
+          //   console.log("Error:", e);
+          // }
+          //  console.log(await Api.authBalance())
+          
+          //   }
+        
         }
-       console.log(await Api.authBalance())
-      } else {
+      else {
         setCurrentUser(null);
       }
       setIsLoading(false); // Set loading to false after fetching user data

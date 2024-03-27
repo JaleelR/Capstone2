@@ -2,7 +2,6 @@
 
 /** Routes for users. */
 
-const jsonschema = require("jsonschema");
 
 const express = require("express");
 const { ensureCorrectUser} = require("../auth");
@@ -10,6 +9,13 @@ const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 
 const router = express.Router();
+
+
+
+/*
+Gets {username} from req.params 
+RETURNS {username, firstname, lastname} upon success 
+ */
 
 router.get("/:username", ensureCorrectUser, async function (req, res, next) {
     try {
@@ -20,6 +26,10 @@ router.get("/:username", ensureCorrectUser, async function (req, res, next) {
     }
 });
 
+/*
+Gets {username} from req.params & updated {username, firstname, lastname}
+RETURNS {username, firstname, lastname} upon success 
+ */
 router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
     try {
         const user = await User.update(req.params.username, req.body);
@@ -29,6 +39,10 @@ router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
     }
 });
 
+/*
+Gets {username} from req.params 
+RETURNS {deleted: username} upon success 
+ */
 router.delete("/:username", ensureCorrectUser, async function (req, res, next) {
     try {
         await User.remove(req.params.username);

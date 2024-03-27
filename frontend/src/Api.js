@@ -41,7 +41,7 @@ export class Api {
 
     /* Logs in a user */
     static async login(username, password) {
-        let res = await this.request(`token`, { username, password }, "post");
+        let res = await this.request(`auth/token`, { username, password }, "post");
         this.token = res.token;
         console.log("login token,", res.token)
         return res.token;
@@ -49,7 +49,7 @@ export class Api {
 
     /* registers a user */
     static async signup(username, password, firstName, lastName) {
-        let res = await this.request(`register`, { username, password, firstName, lastName }, "post");
+        let res = await this.request(`auth/register`, { username, password, firstName, lastName }, "post");
         this.token = res.token;
         return res.token;
     };
@@ -62,28 +62,28 @@ export class Api {
 
     
     static async getLinkToken() {
-        let res = await this.request(`create_link_token`, {},  "post");
+        let res = await this.request(`plaid/create_link_token`, {},  "post");
         return res.link_token;
     };
 
     static async exchangePublicToken(publicToken) {
-        let res = await this.request(`exchange_public_token`, {publicToken},  "post");
+        let res = await this.request(`plaid/exchange_public_token`, {publicToken},  "post");
         return res;
     };
 
     static async authGet() {
-        let res = await this.request(`auth`, {},  "post");
+        let res = await this.request(`plaid/auth`, {},  "post");
         return res;
     };
 
     static async authBalance() {
-        let res = await this.request(`auth`, {},  "post");
+        let res = await this.request(`plaid/auth`, {},  "post");
         const accountInfo = res.accounts.map(r => ({ name: r.official_name, balance: r.balances }));
         return accountInfo;
     };
 
     static async transactions() {
-        let res = await this.request(`transactions`, {}, "post");
+        let res = await this.request(`plaid/transactions`, {}, "post");
         return res.added;
     };
     static async transactionsSplice() {
