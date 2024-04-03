@@ -2,7 +2,8 @@ const express = require("express");
 const { ensureCorrectUser, ensureLoggedIn } = require("../auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
-const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+const Transactions = require("../models/plaidApi");
+const { Configuration, PlaidApi, PlaidEnvironments, ConsumerReportPermissiblePurpose } = require('plaid');
 
 const router = express.Router();
 
@@ -84,26 +85,55 @@ router.post('/exchange_public_token', async function (request, response, next) {
 
 
 
-
+router.get("/Alltransactions", async function (req, res, next) {
+    const 
+})
 /*
 plaid/transactions RETURNS the transactions of the account holder 
  */
 
 router.post("/transactions", async function (req, res, next) {
     const getUser = res.locals.user;
+    console.log("trasuser", getUser); 
     const userToken = await User.getToken(getUser.username);
-    console.log("TRANSSACTIONNNNNNNSSS:", userToken)
+    
     try {
         const transactionsResult = await plaidClient.transactionsSync({
             access_token: userToken
         });
+        // Iterate over each transaction and insert it into the database
+        for (const transaction of transactionsResult.data.added) {
+            const {
+                transaction_id,
+                category,
+                name,
+                amount,
+                iso_currency_code,
+                date
+            } = transaction;
+      
+            // Insert the transaction into the database
+            await Transactions.insertTransactions(
+                transaction_id,
+                getUser.id,
+                category.join(', '), // Assuming category is an array, converting it to a string
+                name,
+                amount,
+                iso_currency_code,
+                date
+            );
+        }
 
-        return res.json(transactionsResult.data);
+        // Respond with success message or whatever is needed
+        return res.json({ message: "Transactions saved successfully" });
     } catch (err) {
-        console.log("IT DIDNT WORK");
-        return next(err)
+       
+        console.log("Error fetching or saving transactions:", err);
+        return next(err);
+        
     }
 });
+
 
 
 /*

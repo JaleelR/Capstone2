@@ -37,14 +37,14 @@ function App() {
             //               console.log("Auth not created", e)
             //             }
 
-          //   try {
-          //     const transactions = await Api.transactions();
-          //     console.log("transactionnnnnnnsssss", transactions);
-          //   } catch (e) {
-          //     console.log("trans not made", e)
-          //   }
+            // try {
+            //   const transactions = await Api.transactions();
+            //   console.log("transactionnnnnnnsssss", transactions);
+            // } catch (e) {
+            //   console.log("trans not made", e)
+            // }
 
-          
+    
           // } catch (e) {
           //   console.log("Error:", e);
           // }

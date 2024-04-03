@@ -34,14 +34,15 @@ export const ConnectBank = () => {
     useEffect(() => {
         async function access_token() {
             if (publicToken) {
-                const accessToken = await Api.exchangePublicToken(publicToken);
-                console.log("access token:", accessToken);
-                navigate("/")
+               await Api.exchangePublicToken(publicToken);
+                       navigate("/"); 
+             
             } else {
                 console.log("no public token")
             }
         };
         access_token();
+
     }, [publicToken])
 
    
@@ -50,6 +51,7 @@ export const ConnectBank = () => {
         <div>
            
             <button onClick={() => open()} disabled={!ready}>
+               {console.log("@@@@@@@@@", publicToken)} 
                 Connect a bank account
             </button>
         </div>

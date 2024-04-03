@@ -84,7 +84,7 @@ export class Api {
 
     static async transactions() {
         let res = await this.request(`plaid/transactions`, {}, "post");
-        return res.added;
+        return res;
     };
     static async transactionsSplice() {
         let res = await this.request(`transactions`, {}, "post");

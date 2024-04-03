@@ -16,13 +16,13 @@ CREATE TABLE users (
 
 CREATE TABLE transactions
 (
-  id SERIAL PRIMARY KEY,
-user_id integer REFERENCES users(id) ON DELETE CASCADE,
-  category text,
+  transaction_id TEXT PRIMARY KEY,
+user_id integer REFERENCES users(id) ON DELETE CASCADE ,
+  category text NOT NULL,
   name text NOT NULL,
   amount numeric(28,10) NOT NULL,
-  count integer, 
   days_requested integer,
   iso_currency_code text,
-  date date NOT NULL
+  date date NOT NULL,
+  CONSTRAINT unique_transaction UNIQUE (transaction_id)
 );
