@@ -1,3 +1,4 @@
+const { query } = require("express");
 const db = require("../db");
 const {
     NotFoundError,
@@ -8,12 +9,12 @@ const {
 let errorLogged = false; // Declare the errorLogged variable outside of the method
 
 class Transactions {
-    static async insertTransactions(transaction_id, userId, category, name, amount, isoCurrencyCode, date) {
+    static async insertTransactions(transaction_id, userId, category, merchant_name, amount, isoCurrencyCode, date) {
         try {
             const result = await db.query(`
-                INSERT INTO Transactions (transaction_id, user_id, category, name, amount, iso_currency_code, date)
+                INSERT INTO Transactions (transaction_id, user_id, category, merchant_name, amount, iso_currency_code, date)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                [transaction_id, userId, category, name, amount, isoCurrencyCode, date],
+                [transaction_id, userId, category, merchant_name, amount, isoCurrencyCode, date],
             );
 
             const transactions = result;
@@ -42,17 +43,22 @@ class Transactions {
     };
 
 
-    static async getAllTransactions(userId) {
-        const result = await db.query(`
-        SELECT name, amount, date, iso_currency_code 
-        FROM transactions
-    `,);
-        const allTransactions = result;
+    static async getTransactions(user_id, orderByColumn = 'date', orderBy = 'DESC') {
+        const queryString = `
+        SELECT transaction_id, merchant_name, amount, date, iso_currency_code 
+        FROM transactions where user_id = $1
+        ORDER BY ${orderByColumn} ${orderBy}
+    `;
+        console.log('SQL Query:', queryString); // Log the SQL query
+        const result = await db.query(queryString, [user_id]);
+        const allTransactions = result.rows;
         if (!allTransactions) {
-            throw new UnauthorizedError("Transactions error");
+            throw new NotFoundError("Transactions error");
         };
         return allTransactions;
     };
+
+
 
 
 

@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "./userContext";
 import { Api } from "./Api";
 import { useNavigate } from "react-router-dom"
+import { TransactionsCard } from "./transactioncard";
+import { FormattedDate } from "./FormattedDate";
 
 export const Transactions = () => {
     const navigate = useNavigate();
@@ -9,23 +11,20 @@ export const Transactions = () => {
     const { currentUser } = useContext(UserContext);
 
     useEffect(() => {
-        async function getallTransactions() {
-            try {
-               if (currentUser && transactionsSaved.length === 0) {
-                   const transactions = await Api.transactions();   
-                   console.log(transactions);
-                   setTransactionsSaved(transactions); 
-               } 
+            async function getallTransactions() {
+                try {    
+            
+                const transactions = await Api.saveTransactions(
+                    currentUser.user.username);
                 
-               
-            } catch (e) {
-                console.log("trans not made", e)
+                    const transactions2 = await Api.getTransactions();
+                    setTransactionsSaved(oldtransactions => transactions2 )
+            }
+         catch (error) {
+                console.log("there was an error getting transactions", error)
             }
         }
-         {
-
-            getallTransactions();
-        }
+        getallTransactions(); 
     }, [currentUser]);
 
     if (!currentUser) {
@@ -34,7 +33,11 @@ export const Transactions = () => {
 
     return (
         <div>
-            <h1>View Transactions for {currentUser.user.username}</h1>
+        <h1>Transactions for {currentUser.user.username}</h1>
+            {transactionsSaved.map(t => (
+                <TransactionsCard key={t.transaction_id } name={t.merchant_name} amount={t.amount } date={FormattedDate(t.date)} />
+            ))}
+            
 
         </div>
     )

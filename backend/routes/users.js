@@ -7,7 +7,7 @@ const express = require("express");
 const { ensureCorrectUser} = require("../auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
-
+const Transactions = require("../models/plaidApi")
 const router = express.Router();
 
 
@@ -19,12 +19,13 @@ RETURNS {username, firstname, lastname} upon success
 
 router.get("/:username", ensureCorrectUser, async function (req, res, next) {
     try {
-        const user = await User.get(req.params.username);
+        const user = res.locals.user;
         return res.json({ user });
     } catch (err) {
         return next(err);
     }
 });
+
 
 /*
 Gets {username} from req.params & updated {username, firstname, lastname}
@@ -32,6 +33,7 @@ RETURNS {username, firstname, lastname} upon success
  */
 router.patch("/:username", ensureCorrectUser, async function (req, res, next) {
     try {
+        
         const user = await User.update(req.params.username, req.body);
         return res.json({ user });
     } catch (err) {

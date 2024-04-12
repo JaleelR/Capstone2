@@ -83,20 +83,32 @@ router.post('/exchange_public_token', async function (request, response, next) {
     }
 });
 
-
-
-router.get("/Alltransactions", async function (req, res, next) {
-    const 
-})
 /*
 plaid/transactions RETURNS the transactions of the account holder 
  */
+
+router.get("/transactions", async function (req, res, next) {
+    try {
+        const user = res.locals.user;
+        const { orderByColumn, orderBy } = req.query;
+        console.log("%%%%%%%%%", user)
+        const userInfo = await User.getUser(user.username);
+        const transactions = await Transactions.getTransactions(userInfo.id, orderByColumn, orderBy);
+        return res.json({ transactions });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+
 
 router.post("/transactions", async function (req, res, next) {
     const getUser = res.locals.user;
     console.log("trasuser", getUser); 
     const userToken = await User.getToken(getUser.username);
-    
+    const user = await User.getUser(getUser.username);
+ 
+ 
     try {
         const transactionsResult = await plaidClient.transactionsSync({
             access_token: userToken
@@ -106,21 +118,22 @@ router.post("/transactions", async function (req, res, next) {
             const {
                 transaction_id,
                 category,
-                name,
+                merchant_name,
                 amount,
                 iso_currency_code,
                 date
             } = transaction;
-      
+            
+         
             // Insert the transaction into the database
             await Transactions.insertTransactions(
                 transaction_id,
-                getUser.id,
+                user.id,
                 category.join(', '), // Assuming category is an array, converting it to a string
-                name,
+                merchant_name,
                 amount,
                 iso_currency_code,
-                date
+               date 
             );
         }
 

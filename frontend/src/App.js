@@ -26,6 +26,7 @@ function App() {
 
           try {
             let user = await Api.getUserInfo(username);
+            console.log("###############",user)
             setCurrentUser(user);
           } catch (e) {
             console.log("cannot find user")

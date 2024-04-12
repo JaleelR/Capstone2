@@ -82,15 +82,18 @@ export class Api {
         return accountInfo;
     };
 
-    static async transactions() {
-        let res = await this.request(`plaid/transactions`, {}, "post");
-        return res;
+
+
+    static async saveTransactions(username) {
+        let res = await this.request(`plaid/transactions`, {username}, "post");
+        return res.transactions;
     };
-    static async transactionsSplice() {
-        let res = await this.request(`transactions`, {}, "post");
-        const transactionsEdit = res.accounts.map(t => ({ Amount: t.amount, category: t.category}));
-        return transactionsEdit.added;
+    static async getTransactions( orderByColumn, orderBy) {
+        let res = await this.request(`plaid/transactions`, { orderByColumn, orderBy});
+        return res.transactions;
     };
+
+
 
     /* update User */
     static async updateUser(username, data) {

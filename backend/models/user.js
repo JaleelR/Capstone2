@@ -24,7 +24,7 @@ class User {
     static async authenticate(username, password) {
         // try to find the user first
         const result = await db.query(
-            `SELECT username,
+            `SELECT id, username,
                 token,
                   password,
                   first_name AS "firstName",
@@ -78,7 +78,7 @@ class User {
             last_name
             )
            VALUES ($1, $2, $3, $4)
-           RETURNING username, first_name AS "firstName", last_name AS "lastName"`,
+           RETURNING id, username, first_name AS "firstName", last_name AS "lastName"`,
             [
                 username,
                 hashedPassword,
@@ -111,9 +111,9 @@ class User {
      * Throws NotFoundError if user not found.
      **/
 
-    static async get(username) {
+    static async getUser(username) {
         const userRes = await db.query(
-            `SELECT username,
+            `SELECT id, username,
                   first_name AS "firstName",
                   last_name AS "lastName"
            FROM users

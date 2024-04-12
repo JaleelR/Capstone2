@@ -17,9 +17,9 @@ CREATE TABLE users (
 CREATE TABLE transactions
 (
   transaction_id TEXT PRIMARY KEY,
-user_id integer REFERENCES users(id) ON DELETE CASCADE ,
+user_id integer REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   category text NOT NULL,
-  name text NOT NULL,
+  merchant_name text NOT NULL,
   amount numeric(28,10) NOT NULL,
   days_requested integer,
   iso_currency_code text,
