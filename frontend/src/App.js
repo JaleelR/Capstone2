@@ -3,7 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { RoutesComponent } from './RoutesComponent';
 import { Api } from './Api';
 import { UserContext } from './userContext';
-import logo from './logo.svg';
+import { NavBar } from './NavBar';
 import { jwtDecode } from "jwt-decode";
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
@@ -77,7 +77,7 @@ function App() {
       <UserContext.Provider value={{ currentUser, setCurrentUser, balances }}> 
         <div className="App">
           <header className="App-header">
-            <button onClick={logout}>logout</button>
+         
             <RoutesComponent register={register} login={login} logout={logout} />
           </header>
         </div>

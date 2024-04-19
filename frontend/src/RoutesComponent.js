@@ -9,10 +9,11 @@ import { Savings } from "./Savings";
 import { InVOut } from "./InVOut";
 import { EditForm } from "./EditForm"
 import {ConnectBank} from "./ConnectBank"
-
-export const RoutesComponent = ({register, login}) => {
+import { NavBar } from "./NavBar";
+export const RoutesComponent = ({register, login, logout}) => {
     return (
         <>
+            <NavBar logout={logout} />
             <Routes>
                 <Route exact path="/" element={<Home/>} />
        

@@ -5,7 +5,7 @@ const User = require("../models/user");
 const Transactions = require("../models/plaidApi");
 const { Configuration, PlaidApi, PlaidEnvironments, ConsumerReportPermissiblePurpose } = require('plaid');
 const cron = require('node-cron');
-const { consoleLog } = require("@ngrok/ngrok");
+
 const router = express.Router();
 
 //Retrives varibles needed from .env file needed for Plaid api
