@@ -76,22 +76,53 @@ export class Api {
         return res;
     };
 
-    static async authBalance() {
-        let res = await this.request(`plaid/auth`, {},  "post");
-        const accountInfo = res.accounts.map(r => ({ name: r.official_name, balance: r.balances }));
-        return accountInfo;
+    static async saveTransactions() {
+        try {
+            let res = await this.request(`plaid/transactions`,{},  "post");
+            console.log(res)
+        return res;   
+        } catch (e) {
+            console.log("saveTransactions error", e)
+        }
+       
+    };
+
+    static async getTransactions(startDate, endDate, orderByColumn, orderBy) {
+        // Log API call parameters
+        console.log('API Call Parameters:', { orderByColumn, orderBy, startDate, endDate });
+
+        try {
+            let res = await this.request(`plaid/transactions`, { orderByColumn, orderBy, startDate, endDate });
+            console.log("successfully got transactions!")
+            return res.transactions;
+        } catch (error) {
+            console.error("API Error:", error);
+            throw error;
+        }
+    }
+
+
+    static async saveBalance() {
+        try {
+            let res = await this.request(`plaid/balances`, {}, "post");
+            return res;
+        } catch (e) {
+            console.log("Saving accounts error", e)
+            throw e; // re-throw the error to handle it in the calling function
+        }
     };
 
 
+    static async getBalance(id) {
+        try {
+            let res = await this.request(`plaid/balances`, {id});
+            return res.balances;
+        } catch (error) {
+            console.error("API Error:", error);
+            throw error;
+        }
+    }
 
-    static async saveTransactions(username) {
-        let res = await this.request(`plaid/transactions`, {username}, "post");
-        return res.transactions;
-    };
-    static async getTransactions( orderByColumn, orderBy) {
-        let res = await this.request(`plaid/transactions`, { orderByColumn, orderBy});
-        return res.transactions;
-    };
 
 
 
@@ -102,3 +133,4 @@ export class Api {
     };
 
 }
+

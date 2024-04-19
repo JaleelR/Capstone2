@@ -21,9 +21,12 @@ function authenticateJWT(req, res, next) {
         }
         return next();
     } catch (err) {
-        return next();
+        console.error("JWT Verification Error:", err.message);
+        return res.status(401).json({ error: "Unauthorized" });
     }
 }
+
+
 
 //checks if user information is in res.locals if so continue with next middleware if not proceed with error 
 function ensureLoggedIn(req, res, next) {

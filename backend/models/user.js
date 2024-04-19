@@ -21,6 +21,22 @@ class User {
      * Throws UnauthorizedError is user not found or wrong password.
      **/
 
+
+    static async getAllUsers() {
+        const usersRes = await db.query(
+            `SELECT id, username,
+              first_name AS "firstName",
+              last_name AS "lastName"
+         FROM users`
+        );
+
+        const users = usersRes.rows;
+
+        if (!users) throw new NotFoundError("No users found");
+
+        return users;
+    };
+
     static async authenticate(username, password) {
         // try to find the user first
         const result = await db.query(

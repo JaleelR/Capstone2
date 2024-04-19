@@ -4,7 +4,8 @@ const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const Transactions = require("../models/plaidApi");
 const { Configuration, PlaidApi, PlaidEnvironments, ConsumerReportPermissiblePurpose } = require('plaid');
-
+const cron = require('node-cron');
+const { consoleLog } = require("@ngrok/ngrok");
 const router = express.Router();
 
 //Retrives varibles needed from .env file needed for Plaid api
@@ -18,6 +19,55 @@ const configuration = new Configuration({
     },
 });
 const plaidClient = new PlaidApi(configuration);
+
+
+cron.schedule('0 0 * * *', async () => {
+    try {
+        // Fetch all users
+        const users = await User.getAllUsers(); // Assuming you have a method to get all users
+
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
+        // Iterate through each user and fetch transactions for today's date
+        for (const user of users) {
+            const userToken = await User.getToken(user.username);
+
+            // Update transactions
+            const transactionsResult = await plaidClient.transactionsGet({
+                access_token: userToken,
+                start_date: today,
+                end_date: today,
+            });
+
+            // Process and insert transactions into the database
+            for (const transaction of transactionsResult.data.transactions) {
+                await Transactions.insertTransactions(
+                    transaction.transaction_id,
+                    user.id,
+                    transaction.category.join(', '),
+                    transaction.merchant_name,
+                    transaction.amount,
+                    transaction.iso_currency_code,
+                    transaction.date
+                );
+            }
+
+            // Fetch account balance from the latest transaction response
+            const account = transactionsResult.data.accounts[0]; // Assuming the first account is the desired one
+            const balance = account.balances.current;
+
+            // Update the user's balance in the database
+            await User.updateBalance(user.id, balance); // Assuming you have a method to update the user's balance
+
+            console.log(`Transactions and balance updated for user: ${user.username}`);
+        }
+    } catch (error) {
+        console.error('Error updating transactions or balance:', error);
+    }
+});
+
+
 
 
 
@@ -87,65 +137,90 @@ router.post('/exchange_public_token', async function (request, response, next) {
 plaid/transactions RETURNS the transactions of the account holder 
  */
 
+// ... existing imports ...
+
 router.get("/transactions", async function (req, res, next) {
     try {
         const user = res.locals.user;
-        const { orderByColumn, orderBy } = req.query;
-        console.log("%%%%%%%%%", user)
+        let { startDate, endDate, orderByColumn, orderBy } = req.query;
+
+        // Extract year and month from startDate
+        const [year, month] = startDate.split('-').map(Number);
+
+        // Validate year and month
+        if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+            console.error('Invalid year or month:', year, month);
+            return res.status(400).json({ error: 'Invalid year or month' });
+        }
+
+    
         const userInfo = await User.getUser(user.username);
-        const transactions = await Transactions.getTransactions(userInfo.id, orderByColumn, orderBy);
+           console.log("UserInfoooooooooooooooooooooop:", userInfo);
+
+
+        const transactions = await Transactions.getTransactions(userInfo.id, startDate, endDate, orderByColumn, orderBy);
+        console.log("Transactions:", transactions);
+
         return res.json({ transactions });
     } catch (err) {
+        console.error("Error in /transactions route:", err);
         return next(err);
     }
 });
+
 
 
 
 router.post("/transactions", async function (req, res, next) {
     const getUser = res.locals.user;
-    console.log("trasuser", getUser); 
+    console.log("userrrrrrrrrrrrrrrr", getUser)
     const userToken = await User.getToken(getUser.username);
     const user = await User.getUser(getUser.username);
- 
- 
-    try {
-        const transactionsResult = await plaidClient.transactionsSync({
-            access_token: userToken
-        });
-        // Iterate over each transaction and insert it into the database
-        for (const transaction of transactionsResult.data.added) {
-            const {
-                transaction_id,
-                category,
-                merchant_name,
-                amount,
-                iso_currency_code,
-                date
-            } = transaction;
-            
-         
-            // Insert the transaction into the database
-            await Transactions.insertTransactions(
-                transaction_id,
-                user.id,
-                category.join(', '), // Assuming category is an array, converting it to a string
-                merchant_name,
-                amount,
-                iso_currency_code,
-               date 
-            );
-        }
 
-        // Respond with success message or whatever is needed
-        return res.json({ message: "Transactions saved successfully" });
+    const startDate = '2022-01-01';  // Start date to fetch transactions
+    const endDate = new Date().toISOString().split('T')[0];    // End date to fetch transactions
+
+    try {
+        const transactionsResult = await plaidClient.transactionsGet({
+            access_token: userToken,
+            start_date: startDate,
+            end_date: endDate,
+        });
+        
+ 
+        if (transactionsResult.data.transactions.length > 0) {
+            for (const transaction of transactionsResult.data.transactions) {
+                const {
+                    transaction_id,
+                    category,
+                    merchant_name,
+                    amount,
+                    iso_currency_code,
+                    date
+                } = transaction;
+
+                // Insert the transaction into the database
+                await Transactions.insertTransactions(
+                    transaction_id,
+                    user.id,
+                    category.join(', '),
+                    merchant_name,
+                    amount,
+                    iso_currency_code,
+                    date
+                );
+            }
+
+            return res.json({ message: "Transactions saved successfully" });
+        } else {
+            return res.json({ message: "No new transactions found" });
+        }
     } catch (err) {
-       
         console.log("Error fetching or saving transactions:", err);
         return next(err);
-        
     }
 });
+
 
 
 
@@ -177,9 +252,62 @@ router.post("/auth",   async function (request, response, next) {
 }
 );
 
+router.post("/balances", async function (request, response, next) {
+    const getUser = response.locals.user;
+    const user = await User.getUser(getUser.username);
+    console.log("______USER______", getUser);
+
+    try {
+        const userToken = await User.getToken(getUser.username);
+        console.log("ACTUALL USERTOKEN:", userToken);
+
+        const plaidRequest = {
+            access_token: userToken,
+        };
+
+        const plaidResponse = await plaidClient.accountsBalanceGet(plaidRequest); // Use accountsBalanceGet instead of getBalance
+        console.log("it worked ", plaidResponse.data);
+
+        // Extract and format the account balances
+        const balances = plaidResponse.data.accounts.map(account => ({
+            accountId: account.account_id,
+            balance: account.balances.current,
+            name: account.name,
+            type: account.type
+        }));
+
+        // Loop through balances and update the database
+        for (const balance of balances) {
+            await Transactions.balances( // Assuming this is the method you want to call to save balances
+                balance.accountId,
+                user.id,
+                balance.balance,
+                balance.name,
+                balance.type
+            );
+        }
+
+        return response.json({ message: 'Balances updated successfully' });
+
+    } catch (error) {
+        console.log("it didnt work", error);
+        next(error); // Pass any errors to the error handling middleware
+    }
+});
 
 
-
+router.get("/balances", async function (req, res, next) {
+    try {
+        const user = res.locals.user;
+        const userInfo = await User.getUser(user.username);
+        console.log("UserInfo:", userInfo);
+        const balances = await Transactions.getBalances(userInfo.id);
+        return res.json({ balances});
+    } catch (err) {
+        console.error("Error in /balance route", err);
+        return next(err);
+    }
+});
 
 
 
