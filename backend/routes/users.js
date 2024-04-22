@@ -17,7 +17,7 @@ Gets {username} from req.params
 RETURNS {username, firstname, lastname} upon success 
  */
 
-router.get("/:username", ensureCorrectUser, async function (req, res, next) {
+router.get("/:username" , ensureCorrectUser, async function (req, res, next) {
     try {
         const user = res.locals.user;
         return res.json({ user });

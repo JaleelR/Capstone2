@@ -5,11 +5,13 @@ const { SECRET_KEY } = require("./config");
 
 function createToken(user) {
     let payload = {
-        id: user.id,
         username: user.username || false,
     };
+    console.log("Payload:", payload); // Add this line for debugging
 
     return jwt.sign(payload, SECRET_KEY);
 }
 
-module.exports = { createToken };
+module.exports = { 
+createToken
+}

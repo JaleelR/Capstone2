@@ -1,13 +1,9 @@
-import React, { useState, useEffect} from "react";
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+export const SignupForm = ({ register }) => {
+    const navigate = useNavigate();
 
-
-export const SignupForm = ({ register}) => {
-    const navigate = useNavigate()
-    
-
-    // const history = useHistory();
     const form = {
         username: "",
         password: "",
@@ -15,23 +11,14 @@ export const SignupForm = ({ register}) => {
         lastName: "",
     };
 
-
     const [signup, setSignup] = useState(form);
 
     async function handleSubmit(e) {
         e.preventDefault();
-        register(signup.username, signup.password, signup.firstName, signup.lastName);
+        const gotToken = register(signup.username, signup.password, signup.firstName, signup.lastName);
+        console.log("Received Token:", gotToken);
         navigate("/connectbank");
-
     }
-
-
-   
-
-
-
-
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -39,58 +26,64 @@ export const SignupForm = ({ register}) => {
             ...prevState,
             [name]: value
         }));
-
-
     };
-
-
 
     return (
         <>
-            <h1>Signup</h1> 
-            {console.log(signup)}
-         
-            <form onSubmit={handleSubmit}>
-                {
+            <h1>Signup</h1>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <label className="input input-bordered flex items-center gap-2">
+                    Username
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        onChange={handleChange}
+                        value={signup.username}
+                        autoComplete="username"
+                        className="grow"
+                    />
+                </label>
 
-                }
-                <label htmlFor="username"><b>Username</b></label>
-                <input
-                    name="username"
-                    type="text"
-                    onChange={handleChange}
-                    value={signup.username}
-                />
+                <label className="input input-bordered flex items-center gap-2">
+                    Password
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        onChange={handleChange}
+                        value={signup.password}
+                        autoComplete="current-password"
+                        className="grow"
+                    />
+                </label>
 
-                <label htmlFor="password"><b>Password</b></label>
-                <input
-                    name="password"
-                    type="text"
-                    onChange={handleChange}
-                    value={signup.password}
-                />
+                <label className="input input-bordered flex items-center gap-2">
+                    First name
+                    <input
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        onChange={handleChange}
+                        value={signup.firstName}
+                        className="grow"
+                    />
+                </label>
 
-                <label htmlFor="firstName"><b>First name</b></label>
-                <input
-                    name="firstName"
-                    type="text"
-                    onChange={handleChange}
-                    value={signup.firstName}
-                />
+                <label className="input input-bordered flex items-center gap-2">
+                    Last name
+                    <input
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        onChange={handleChange}
+                        value={signup.lastName}
+                        className="grow"
+                    />
+                </label>
 
-                <label htmlFor="lastName"><b>Last name</b></label>
-                <input
-                    name="lastName"
-                    type="text"
-                    onChange={handleChange}
-                    value={signup.lastName}
-                />
-
-                <br />
-                <button> Submit </button>
+                <button type="submit" className="btn btn-primary">Submit</button>
             </form>
-
-
         </>
-    )
-}
+    );
+};

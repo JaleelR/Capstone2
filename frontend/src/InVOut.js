@@ -56,11 +56,11 @@ export const InVOut = () => {
                     datasets: [
                         {
                             label: 'Amount',
-                            data: [ totalIncome,  totalExpense],
+                            data: [totalIncome, totalExpense],
                             backgroundColor: [
                                 'rgb(62,156,53)',
                                 'rgb(246,14,4)',
-                      
+
                             ],
                             borderWidth: 1,
                         },
@@ -79,7 +79,7 @@ export const InVOut = () => {
     }, [currentUser, balances]);
 
     if (isLoading || !currentUser || !balances || !chartData) {
-        return <div><h1>Income vs spending 💸</h1> Loading...</div>;
+        return <div><h1>Income vs spending </h1> Loading...</div>;
     }
 
     if (error) {
@@ -90,11 +90,11 @@ export const InVOut = () => {
 
     return (
         <div>
-            <h1>Income vs spending 💸</h1>
+            <h1>Income vs spending </h1>
             <p>Checking Balance: {checkingBalance[0]?.balance}</p>
             <div>
 
-               <div><Pie data={chartData} /></div> 
+                <div><Pie data={chartData} /></div>
             </div>
             <p>money Remaining: ${totalDeposits - totalSpending}</p>
         </div>

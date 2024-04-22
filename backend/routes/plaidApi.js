@@ -31,7 +31,7 @@ cron.schedule('0 0 * * *', async () => {
 
         // Iterate through each user and fetch transactions for today's date
         for (const user of users) {
-            const userToken = await User.getToken(user.username);
+            const userToken = await User.getPlaidToken(user.username);
 
             // Update transactions
             const transactionsResult = await plaidClient.transactionsGet({
@@ -63,7 +63,7 @@ cron.schedule('0 0 * * *', async () => {
             console.log(`Transactions and balance updated for user: ${user.username}`);
         }
     } catch (error) {
-        console.error('Error updating transactions or balance:', error);
+        console.error('Error updating transactions or balance:', error.error_code, error.error_message, error.error_type);
     }
 });
 
@@ -94,7 +94,7 @@ router.post('/create_link_token', async function (request, response) {
         response.json(createTokenResponse.data);
     } catch (error) {
         // handle error
-        console.log(error);
+        console.log(error.error_code, error.error_message, error.error_type);
     }
 });
 
@@ -128,8 +128,8 @@ router.post('/exchange_public_token', async function (request, response, next) {
         }
     } catch (error) {
         // handle error
-        console.log("Error at plaid response___________", { Failed: error });
-        next(error);
+        console.log("Error at plaid response___________");
+        next(error.error_code, error.error_message, error.error_type);
     }
 });
 
@@ -162,9 +162,9 @@ router.get("/transactions", async function (req, res, next) {
         console.log("Transactions:", transactions);
 
         return res.json({ transactions });
-    } catch (err) {
-        console.error("Error in /transactions route:", err);
-        return next(err);
+    } catch (error) {
+        console.error("Error in /transactions route:")
+        return next(error.error_code, error.error_message, error.error_type);
     }
 });
 
@@ -172,9 +172,10 @@ router.get("/transactions", async function (req, res, next) {
 
 
 router.post("/transactions", async function (req, res, next) {
-    const getUser = res.locals.user;
+    const getUser = res.locals.user
     console.log("userrrrrrrrrrrrrrrr", getUser)
-    const userToken = await User.getToken(getUser.username);
+    const userToken = await User.getPlaidToken(getUser.username);
+    console.log(":::::::::::::::::", userToken);
     const user = await User.getUser(getUser.username);
 
     const startDate = '2022-01-01';  // Start date to fetch transactions
@@ -216,8 +217,8 @@ router.post("/transactions", async function (req, res, next) {
             return res.json({ message: "No new transactions found" });
         }
     } catch (err) {
-        console.log("Error fetching or saving transactions:", err);
-        return next(err);
+        console.log("Error fetching or saving transactions:");
+        return next(err.error_code, err.error_message, err.error_type);
     }
 });
 
@@ -232,11 +233,11 @@ router.post("/auth",   async function (request, response, next) {
     const getUser = response.locals.user;
     console.log("______USER______", getUser)
     try {
-        const userToken = await User.getToken(getUser.username);
-        console.log("ACTUALL USERTOKEN:", userToken)
+        const accessToken = await User.getPlaidToken(getUser.username);
+        console.log("ACTUALL accessTOKEN:", accessToken)
 
         const plaidRequest = {
-            access_token: userToken,
+            access_token: accessToken,
         };
 
         const plaidResponse = await plaidClient.authGet(plaidRequest);
@@ -247,18 +248,19 @@ router.post("/auth",   async function (request, response, next) {
 
     } catch (error) {
         console.log("it didnt work")
-        next(error); // Pass any errors to the error handling middleware
+        next(error.error_code, error.error_message, error.error_type ); // Pass any errors to the error handling middleware
     }
 }
 );
 
 router.post("/balances", async function (request, response, next) {
     const getUser = response.locals.user;
+    console.log(")))))))",getUser.username)
     const user = await User.getUser(getUser.username);
     console.log("______USER______", getUser);
 
     try {
-        const userToken = await User.getToken(getUser.username);
+        const userToken = await User.getPlaidToken(getUser.username);
         console.log("ACTUALL USERTOKEN:", userToken);
 
         const plaidRequest = {
@@ -266,7 +268,7 @@ router.post("/balances", async function (request, response, next) {
         };
 
         const plaidResponse = await plaidClient.accountsBalanceGet(plaidRequest); // Use accountsBalanceGet instead of getBalance
-        console.log("it worked ", plaidResponse.data);
+        
 
         // Extract and format the account balances
         const balances = plaidResponse.data.accounts.map(account => ({
@@ -290,8 +292,8 @@ router.post("/balances", async function (request, response, next) {
         return response.json({ message: 'Balances updated successfully' });
 
     } catch (error) {
-        console.log("it didnt work", error);
-        next(error); // Pass any errors to the error handling middleware
+        console.log("it didnt work");
+        next(error.error_code, error.error_message, error.error_type); // Pass any errors to the error handling middleware
     }
 });
 
@@ -304,8 +306,8 @@ router.get("/balances", async function (req, res, next) {
         const balances = await Transactions.getBalances(userInfo.id);
         return res.json({ balances});
     } catch (err) {
-        console.error("Error in /balance route", err);
-        return next(err);
+        console.error("Error in /balance route");
+        return next(err.error_code, err.error_message, err.error_type);
     }
 });
 

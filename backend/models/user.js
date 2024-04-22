@@ -41,8 +41,8 @@ class User {
         // try to find the user first
         const result = await db.query(
             `SELECT id, username,
-                token,
                   password,
+                  auth_token,
                   first_name AS "firstName",
                   last_name AS "lastName"
            FROM users
@@ -51,7 +51,7 @@ class User {
         );
 
         const user = result.rows[0];
-
+                console.log("authenticated User:", user)
         if (user) {
             // compare hashed password to a new hash from password
             const isValid = await bcrypt.compare(password, user.password);
@@ -90,6 +90,7 @@ class User {
             `INSERT INTO users
            (username,
             password,
+          
             first_name,
             last_name
             )
@@ -108,17 +109,18 @@ class User {
         return user;
     };
 
-    static async updateAccessToken(username, accessToken) {
+    static async updateAccessToken(username, plaid_token) {
         const result = await db.query(
             `UPDATE users 
-            SET token = $2
-            WHERE username = $1
-            RETURNING username`,
-            [username, accessToken]
+        SET plaid_token = $2
+        WHERE username = $1
+        RETURNING username`,
+            [username, plaid_token]
         );
         const user = result.rows[0];
-        if (!user) throw NotFoundError(`No user: ${username}found!`);
+        if (!user) throw new NotFoundError(`No user found for username: ${username}`);
     }
+
 
     /** Given a username, return data about user.
      *
@@ -151,18 +153,38 @@ class User {
       *
       * Throws NotFoundError if user not found.
       **/
-    static async getToken(username) { 
+    static async getPlaidToken(username) { 
         const userToken = await db.query(
-            `SELECT token FROM users WHERE username = $1`, [username],
+            `SELECT plaid_token FROM users WHERE username = $1`, [username],
         );
-        const token = userToken.rows[0];
-        if (!token) throw new NotFoundError(`no token found`); 
+        const plaidToken = userToken.rows[0];
+        if (!plaidToken) throw new NotFoundError(`no plaid_token found`); 
 
-        return token.token;
-  }
+        return plaidToken.plaid_token;
+    }
+    
+
+    static async saveAuthToken(auth_token, username) {
+        const userToken = await db.query(
+            `UPDATE users SET auth_token = $1 WHERE username = $2 RETURNING auth_token`,
+            [auth_token, username],
+        );
+        const authToken = userToken.rows[0];
+        if (!authToken) throw new NotFoundError(`no auth_token found for username: ${username}`);
+
+        return authToken.auth_token;
+    }
 
 
 
+    static async getAuthToken(auth_token) {
+        const userToken = await db.query(
+            `SELECT auth_token FROM users WHERE auth_token = $1`, [auth_token], // Selecting the entire auth_token
+        );
+        const user = userToken.rows[0];
+        if (!user) throw new NotFoundError(`no user found for auth_token`);
+        return user.auth_token; // Returning the entire auth_token
+    }
 
 
 

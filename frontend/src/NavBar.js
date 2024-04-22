@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { NavLink, useNavigate } from 'react-router-dom';
 import { UserContext } from "./userContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const NavBar = ({ logout }) => {
     const navigate = useNavigate();
@@ -9,6 +11,7 @@ export const NavBar = ({ logout }) => {
     const handleClick = (e) => {
         e.preventDefault();
         logout();
+        // toast.success("Successfully Logged Out")
         navigate('/');
     }
 
@@ -29,7 +32,7 @@ export const NavBar = ({ logout }) => {
                 </>
             ) : (
                 <>
-                    {console.log("Logged out:", currentUser)}
+                   {console.log("currently not logged in")}
                     <NavLink to="/login"> Login </NavLink>
                     <NavLink to="/signup"> Signup </NavLink>
                 </>

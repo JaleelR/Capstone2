@@ -41,11 +41,25 @@ export class Api {
 
     /* Logs in a user */
     static async login(username, password) {
-        let res = await this.request(`auth/token`, { username, password }, "post");
-        this.token = res.token;
-        console.log("login token,", res.token)
-        return res.token;
+        try {
+            console.log("Attempting login with username:", username);
+
+            let res = await this.request(`auth/token`, { username, password }, "post");
+            console.log("Login response:", res); // Log the response
+
+            if (res.token) {
+                this.token = res.token;
+                console.log("Login token:", res.token);
+                return res.token;
+            } else {
+                console.log("Unexpected data:", res);
+            }
+        } catch (error) {
+            console.error("Login error:", error); // Log the error
+            throw error; // Re-throw the error to handle it in the calling function
+        }
     }
+
 
     /* registers a user */
     static async signup(username, password, firstName, lastName) {
@@ -60,31 +74,31 @@ export class Api {
         return res;
     };
 
-    
+
     static async getLinkToken() {
-        let res = await this.request(`plaid/create_link_token`, {},  "post");
+        let res = await this.request(`plaid/create_link_token`, {}, "post");
         return res.link_token;
     };
 
     static async exchangePublicToken(publicToken) {
-        let res = await this.request(`plaid/exchange_public_token`, {publicToken},  "post");
+        let res = await this.request(`plaid/exchange_public_token`, { publicToken }, "post");
         return res;
     };
 
     static async authGet() {
-        let res = await this.request(`plaid/auth`, {},  "post");
+        let res = await this.request(`plaid/auth`, {}, "post");
         return res;
     };
 
     static async saveTransactions() {
         try {
-            let res = await this.request(`plaid/transactions`,{},  "post");
+            let res = await this.request(`plaid/transactions`, {}, "post");
             console.log(res)
-        return res;   
+            return res;
         } catch (e) {
             console.log("saveTransactions error", e)
         }
-       
+
     };
 
     static async getTransactions(startDate, endDate, orderByColumn, orderBy) {
@@ -115,7 +129,7 @@ export class Api {
 
     static async getBalance(id) {
         try {
-            let res = await this.request(`plaid/balances`, {id});
+            let res = await this.request(`plaid/balances`, { id });
             return res.balances;
         } catch (error) {
             console.error("API Error:", error);

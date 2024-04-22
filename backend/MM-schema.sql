@@ -1,7 +1,8 @@
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
-  token TEXT,
+  plaid_token TEXT,
+  auth_token TEXT,
   account_id TEXT,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
