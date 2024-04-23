@@ -15,10 +15,20 @@ export const SignupForm = ({ register }) => {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        const gotToken = register(signup.username, signup.password, signup.firstName, signup.lastName);
-        console.log("Received Token:", gotToken);
-        navigate("/connectbank");
+
+        try {
+            const userReg = await register(signup.username, signup.password, signup.firstName, signup.lastName);
+
+            if (userReg) {
+                console.log("userReg:", userReg);
+                navigate("/connectbank");
+            }
+        } catch (error) {
+            console.log("Error during registration:", error);
+
+        }
     }
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,60 +40,68 @@ export const SignupForm = ({ register }) => {
 
     return (
         <>
-            <h1>Signup</h1>
+            <h1 className="text-3xl">Signup</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
-                <label className="input input-bordered flex items-center gap-2">
-                    Username
-                    <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        onChange={handleChange}
-                        value={signup.username}
-                        autoComplete="username"
-                        className="grow"
-                    />
-                </label>
+                <div className="form-control flex flex-col">
+                    <label className="label">
+                        <span className="label-text">Username</span>
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            onChange={handleChange}
+                            value={signup.username}
+                            autoComplete="username"
+                            className="input input-bordered"
+                        />
+                    </label>
+                </div>
 
-                <label className="input input-bordered flex items-center gap-2">
-                    Password
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        onChange={handleChange}
-                        value={signup.password}
-                        autoComplete="current-password"
-                        className="grow"
-                    />
-                </label>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Password</span>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            onChange={handleChange}
+                            value={signup.password}
+                            autoComplete="current-password"
+                            className="input input-bordered"
+                        />
+                    </label>
+                </div>
 
-                <label className="input input-bordered flex items-center gap-2">
-                    First name
-                    <input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        onChange={handleChange}
-                        value={signup.firstName}
-                        className="grow"
-                    />
-                </label>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">First name</span>
+                        <input
+                            id="firstName"
+                            name="firstName"
+                            type="text"
+                            onChange={handleChange}
+                            value={signup.firstName}
+                            className="input input-bordered"
+                        />
+                    </label>
+                </div>
 
-                <label className="input input-bordered flex items-center gap-2">
-                    Last name
-                    <input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        onChange={handleChange}
-                        value={signup.lastName}
-                        className="grow"
-                    />
-                </label>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Last name</span>
+                        <input
+                            id="lastName"
+                            name="lastName"
+                            type="text"
+                            onChange={handleChange}
+                            value={signup.lastName}
+                            className="input input-bordered"
+                        />
+                    </label>
+                </div>
 
-                <button type="submit" className="btn btn-primary">Submit</button>
+                <button type="submit" id="submitButton" className="btn btn-primary">Submit</button>
             </form>
         </>
     );
-};
+}

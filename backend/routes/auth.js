@@ -14,12 +14,7 @@ router.post("/register", async function (req, res, next) {
     try {
         const { username, password, firstName, lastName } = req.body;
 
-        // Check if the username already exists
-        const existingUser = await User.getUser(username);
-        if (existingUser) {
-            throw new BadRequestError("Username already taken");
-        }
-
+       
         // Register the new user
         const user = await User.register({ username, password, firstName, lastName });
 
@@ -45,8 +40,6 @@ router.post("/token", async function (req, res, next) {
         if (!user) {
             throw new UnauthorizedError("Invalid credentials");
         };
-
-        
         const token = createToken({ username: user.username });
 
         console.log("usertok2", token)

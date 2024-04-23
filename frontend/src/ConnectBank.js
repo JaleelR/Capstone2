@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios"
 import { usePlaidLink } from 'react-plaid-link';
 import { Api } from "./Api";
@@ -9,8 +9,8 @@ export const ConnectBank = () => {
     const [linkToken, setLinkToken] = useState();
     const [publicToken, setPublicToken] = useState();
     const navigate = useNavigate();
-  
-   
+
+
     useEffect(() => {
         async function token_link() {
             const linkToken = await Api.getLinkToken();
@@ -19,7 +19,7 @@ export const ConnectBank = () => {
         }
         token_link();
     }, []);
-   
+
 
 
     const { open, ready } = usePlaidLink({
@@ -34,24 +34,23 @@ export const ConnectBank = () => {
     useEffect(() => {
         async function access_token() {
             if (publicToken) {
-               await Api.exchangePublicToken(publicToken);
-                       navigate("/"); 
-             
+                await Api.exchangePublicToken(publicToken);
+                navigate("/");
+
             } else {
-                console.log("no public token")
+                console.log("no public token");
             }
         };
         access_token();
 
     }, [publicToken])
 
-   
+
 
     return (
         <div>
-           
-            <button onClick={() => open()} disabled={!ready}>
-               {console.log("@@@@@@@@@", publicToken)} 
+
+            <button className="btn btn-primary" onClick={() => open()} disabled={!ready}>
                 Connect a bank account
             </button>
         </div>

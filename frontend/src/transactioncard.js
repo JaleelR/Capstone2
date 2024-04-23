@@ -1,12 +1,9 @@
-import React from "react";
-
-export const TransactionsCard = ({name, amount, date}) => {
+export const TransactionsCard = ({ name, amount, date }) => {
     return (
-        <div>
-            <ul>
-            <li><b>Name:</b>{name}   &nbsp;  <b>Amount:</b>{amount} &nbsp; <b>Date:</b>{date}  </li>   
-            </ul>
-
-        </div>
-    )
-}
+        <tr className="border-b">
+            <td className="border px-4 py-2">{name}</td>
+            <td className="border px-4 py-2">${parseFloat(amount).toFixed(2)}</td>
+            <td className="border px-4 py-2">{date}</td>
+        </tr>
+    );
+};
